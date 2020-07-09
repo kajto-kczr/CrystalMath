@@ -12,7 +12,7 @@ import UIKit
 struct ContentView: View {
     
     @State var searchedNum: Int = 0
-    var dimension: Int = 3
+    @State var dimension: Int = 3
     var difficulty: Int = 1
     //    var possibleCombos: [[Int]] = []
     @State var buttonValues: [Int] = []
@@ -20,23 +20,34 @@ struct ContentView: View {
     @State var allValues: [Int] = []
     @State var currentlySelectedIds: [Int] = []
     @State var newNumComing: Bool = false
+    @State var bgColor: Color = Color.offWhite
+    @State var foregroundColor: Color = Color.gray
+    @State var menuIsTapped: Bool = false
     
     var body: some View {
         ZStack {
             Color.offWhite
             VStack(alignment: .trailing, spacing: 0, content: {
-                FloatingMenu()
-                    .offset(x: 100, y: -80)
-                    .frame(width: 80, height: 80, alignment: .topTrailing)
+                HStack {
+                    FloatingMenu()
+                        .offset(x: dimension < 4 ? 100 : 50, y: -80)
+                        .frame(width: 80, height: 80, alignment: .topTrailing)
+                }
                 VStack(alignment: .center, spacing: 30, content: {
                     Text("Searched Number: \(searchedNum)")
                         .fontWeight(.bold)
-                        .background(RoundedRectangle(cornerRadius: 25)
-                            .fill(Color.offWhite)
-                            .frame(width: 300, height: 100)
-                            .shadow(color: Color.black.opacity(0.2), radius: 10, x: 10, y: 10)
-                            .shadow(color: Color.white.opacity(0.7), radius: 10, x: -5, y: -5))
-                        .foregroundColor(.gray)
+                        .background(
+                            Group {
+                                if !menuIsTapped {
+                                    RoundedRectangle(cornerRadius: 25)
+                                    .fill(bgColor)
+                                    .frame(width: 300, height: 100)
+                                    .shadow(color: Color.black.opacity(0.2), radius: 10, x: 10, y: 10)
+                                    .shadow(color: Color.white.opacity(0.7), radius: 10, x: -5, y: -5)
+                                }
+                                
+                        })
+                        .foregroundColor(menuIsTapped ? Color.clear : foregroundColor)
                     Spacer()
                         .frame(height: 50)
                     ForEach(0..<dimension) {i in
@@ -90,6 +101,10 @@ struct ContentView: View {
         }
     }
     
+    func changeColors() {
+        menuIsTapped.toggle()
+    }
+    
     func buttonAlreadySelected(id: Int) -> Bool {
         for i in currentlySelectedIds {
             if i == id {
@@ -114,6 +129,7 @@ struct ContentView: View {
         let firstNum = Int.random(in: 1..<searchedNum)
         let secondNum = searchedNum - firstNum
         print("\(firstNum) + \(secondNum) = \(searchedNum)")
+        allValues = allValues.filter({ $0 != firstNum && $0 != secondNum })
         buttonValues.append(contentsOf: [firstNum, secondNum])
         
         
@@ -121,16 +137,23 @@ struct ContentView: View {
         allValues.shuffle()
         
         while leftCount > 0 {
-            let num = allValues.first!
-            buttonValuesWithoutSimplest.append(num)
+            var num = allValues.first
+            if num != nil {
+                buttonValuesWithoutSimplest.append(num!)
+            } else {
+                num = searchedNum - leftCount
+            }
+            
             if !hasPossibilities(sNumber: searchedNum, maK: 2) {
-                if !buttonValues.contains(num) && repetitionCounter < 50 {
-                    buttonValues.append(num)
+                if !buttonValues.contains(num!) && repetitionCounter < 50 {
+                    buttonValues.append(num!)
                     allValues.remove(at: 0)
                     leftCount -= 1
                 } else {
-                    buttonValues.append(num)
-                    allValues.remove(at: 0)
+                    buttonValues.append(num!)
+                    if allValues.count > 0 {
+                        allValues.remove(at: 0)
+                    }
                     leftCount -= 1
                 }
             } else {
@@ -225,23 +248,194 @@ struct ContentView_Previews: PreviewProvider {
     }
 }
 
-struct MenuItem: View {
+struct BottomMenuItem: View {
     var icon: String
+    var id: Int
     
     var body: some View {
         ZStack {
-            Circle()
-                .foregroundColor(Color.offWhite)
-                .frame(width: 55, height: 55)
-            HStack {
+            Button(action: {
+                self.bottomMenuItemTapped()
+            }) {
                 Image(systemName: icon)
-                .imageScale(.large)
-                .foregroundColor(Color.gray)
+                    .scaleEffect(1.4)
+                    .frame(width: 55, height: 55)
+                    .foregroundColor(Color.gray)
+                    .shadow(color: Color.black.opacity(0.2), radius: 10, x: 10, y: 10)
+                    .shadow(color: Color.white.opacity(0.7), radius: 10, x: -5, y: -5)
             }
+            .background(
+                Circle()
+                    .fill(Color.offWhite)
+                    .shadow(color: Color.black.opacity(0.2), radius: 10, x: 10, y: 10)
+                    .shadow(color: Color.white.opacity(0.7), radius: 10, x: -5, y: -5))
         }
-        .shadow(color: Color.black.opacity(0.2), radius: 10, x: 10, y: 10)
-        .shadow(color: Color.white.opacity(0.7), radius: 10, x: -5, y: -5)
         .transition(.move(edge: .trailing))
+    }
+    
+    func bottomMenuItemTapped() {
+        let str = String(id)
+        let digits = str.digits
+        let cat = digits[0]
+        let choice = digits[1]
+        
+        switch cat {
+        case 1:
+            break
+        case 2:
+            break
+        case 3:
+            break
+        default:
+            break
+        }
+    }
+}
+
+struct MenuItem: View {
+    var icon: String
+    var id: Int
+    @State var isPressed = false
+    @State var showBottomMenuItem1 = false
+    @State var showBottomMenuItem2 = false
+    @State var showBottomMenuItem3 = false
+    @State var showBottomMenuItem4 = false
+    @State var showBottomMenuItem5 = false
+    @State var showBottomMenuItem6 = false
+    @State var showBottomMenuItem7 = false
+    @State var showBottomMenuItem8 = false
+    @State var showBottomMenuItem9 = false
+    
+    
+    var body: some View {
+        ZStack {
+            HStack {
+                Button(action: {
+                    self.showMenu(id: self.id)
+                }) {
+                    Image(systemName: icon)
+                        .scaleEffect(1.4)
+                        .frame(width: 55, height: 55)
+                        .foregroundColor(Color.gray)
+                        .shadow(color: Color.black.opacity(0.2), radius: 10, x: 10, y: 10)
+                        .shadow(color: Color.white.opacity(0.7), radius: 10, x: -5, y: -5)
+                }
+                .background(
+                    Group {
+                        if !isPressed {
+                            Circle()
+                                .fill(Color.offWhite)
+                                .shadow(color: Color.black.opacity(0.2), radius: 10, x: 10, y: 10)
+                                .shadow(color: Color.white.opacity(0.7), radius: 10, x: -5, y: -5)
+                        } else {
+                            Circle()
+                                .fill(Color.offWhite)
+                                .overlay(
+                                    Circle()
+                                        .stroke(Color.gray, lineWidth: 4)
+                                        .blur(radius: 4)
+                                        .offset(x: 2, y: 2)
+                                        .mask(Circle().fill(LinearGradient(Color.black, Color.clear)))
+                            )
+                                .overlay(
+                                    Circle()
+                                        .stroke(Color.white, lineWidth: 8)
+                                        .blur(radius: 4)
+                                        .offset(x: -2, y: -2)
+                                        .mask(Circle().fill(LinearGradient(Color.clear, Color.black)))
+                            )
+                        }
+                    }
+                    
+                )
+                
+                if showBottomMenuItem1 {
+                    BottomMenuItem(icon: "2.square.fill", id: 11)
+                }
+                
+                if showBottomMenuItem2 {
+                    BottomMenuItem(icon: "3.square.fill", id: 12)
+                }
+                
+                if showBottomMenuItem3 {
+                    BottomMenuItem(icon: "4.square.fill", id: 13)
+                }
+                if showBottomMenuItem4 {
+                    BottomMenuItem(icon: "1.circle", id: 21)
+                }
+                
+                if showBottomMenuItem5 {
+                    BottomMenuItem(icon: "2.circle", id: 22)
+                }
+                
+                if showBottomMenuItem6 {
+                    BottomMenuItem(icon: "3.circle", id: 23)
+                }
+                if showBottomMenuItem7 {
+                    BottomMenuItem(icon: "plus.square.fill", id: 31)
+                }
+                if showBottomMenuItem8 {
+                    BottomMenuItem(icon: "minus.square.fill", id: 32)
+                }
+                
+                if showBottomMenuItem9 {
+                    BottomMenuItem(icon: "multiply.square.fill", id: 33)
+                }
+            }
+            
+        }
+        .transition(.move(edge: .trailing))
+    }
+    
+    func showMenu(id: Int) {
+        isPressed.toggle()
+        
+        switch id {
+        case 1:
+            withAnimation {
+                showBottomMenuItem1.toggle()
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1, execute: {
+                withAnimation {
+                    self.showBottomMenuItem2.toggle()
+                }
+            })
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2, execute: {
+                withAnimation {
+                    self.showBottomMenuItem3.toggle()
+                }
+            })
+        case 2:
+            withAnimation {
+                showBottomMenuItem4.toggle()
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1, execute: {
+                withAnimation {
+                    self.showBottomMenuItem5.toggle()
+                }
+            })
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2, execute: {
+                withAnimation {
+                    self.showBottomMenuItem6.toggle()
+                }
+            })
+        case 3:
+            withAnimation {
+                showBottomMenuItem7.toggle()
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1, execute: {
+                withAnimation {
+                    self.showBottomMenuItem8.toggle()
+                }
+            })
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2, execute: {
+                withAnimation {
+                    self.showBottomMenuItem9.toggle()
+                }
+            })
+        default:
+            break
+        }
     }
 }
 
@@ -298,13 +492,13 @@ struct FloatingMenu: View {
                 
             )
             if showMenuItem1 {
-                MenuItem(icon: "\(d).square.fill")
+                MenuItem(icon: "\(d).square.fill", id: 1)
             }
             if showMenuItem2 {
-                MenuItem(icon: "\(lvl).circle")
+                MenuItem(icon: "\(lvl).circle", id: 2)
             }
             if showMenuItem3 {
-                MenuItem(icon: "plus.square.fill")
+                MenuItem(icon: "plus.square.fill", id: 3)
             }
         }
     }
@@ -337,9 +531,7 @@ struct NeumorphicButtonStyle: ButtonStyle {
         NeumorphicButton(id: id, currentlySelectedIds: $selectedIds, configuration: configuration)
     }
     
-    struct NeumorphicButton: View {
-        //        @State var pressed = UserDefaults.standard.bool(forKey: "pressed")
-        //        @State var pressed: Bool
+    struct NeumorphicButton: View, Identifiable {
         let id: Int
         @Binding var currentlySelectedIds: [Int]
         
@@ -352,8 +544,6 @@ struct NeumorphicButtonStyle: ButtonStyle {
                 .contentShape(Circle())
                 .background(
                     Group {
-                        //                        if configuration.isPressed {
-                        //                        if pressed {
                         if isSelected() {
                             Circle()
                                 .fill(Color.offWhite)
@@ -389,10 +579,6 @@ struct NeumorphicButtonStyle: ButtonStyle {
             }
             return false
         }
-        
-        //        func buttonIsPressed() {
-        //            pressed = !pressed
-        //        }
     }
 }
 
@@ -407,35 +593,7 @@ extension LinearGradient {
         self.init(gradient: Gradient(colors: colors), startPoint: .topLeading, endPoint: .bottomTrailing)
     }
 }
-//
-//configuration.label
-//    .padding(30)
-//    .frame(width: UIScreen.main.bounds.width/6, height: UIScreen.main.bounds.width/6, alignment: .center)
-//    .contentShape(Circle())
-//    .background(
-//        Group {
-//            if configuration.isPressed {
-//                Circle()
-//                    .fill(Color.offWhite)
-//                    .overlay(
-//                        Circle()
-//                            .stroke(Color.gray, lineWidth: 4)
-//                            .blur(radius: 4)
-//                            .offset(x: 2, y: 2)
-//                            .mask(Circle().fill(LinearGradient(Color.black, Color.clear)))
-//                )
-//                    .overlay(
-//                        Circle()
-//                            .stroke(Color.white, lineWidth: 8)
-//                            .blur(radius: 4)
-//                            .offset(x: -2, y: -2)
-//                            .mask(Circle().fill(LinearGradient(Color.clear, Color.black)))
-//                )
-//            } else {
-//                Circle()
-//                    .fill(Color.offWhite)
-//                    .shadow(color: Color.black.opacity(0.2), radius: 10, x: 10, y: 10)
-//                    .shadow(color: Color.white.opacity(0.7), radius: 10, x: -5, y: -5)
-//            }
-//        }
-//)
+
+extension StringProtocol {
+    var digits: [Int] { compactMap(\.wholeNumberValue) }
+}
